@@ -1,19 +1,23 @@
 package com.bobslab;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
-import io.netty.handler.codec.http.multipart.HttpDataFactory;
-import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import io.netty.handler.codec.http.multipart.*;
+import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+
+import static io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.*;
 
 /**
  * Created by bast on 2016-04-19.
@@ -66,7 +70,53 @@ public class ApiRequestParser extends SimpleChannelInboundHandler<FullHttpMessag
             ByteBuf content = httpContent.content();
 
             if (msg instanceof LastHttpContent) {
-                logger.debug()
+                logger.debug("LastHttpContent message received!!" + request.getUri());
+
+                LastHttpContent trailer = (LastHttpContent) msg;
+
+                readPostData();
+
+                ApiRequest service = ServiceDispatcher.dispatch(reqData);
+
+                try {
+                    service.executeService();
+
+                    apiResult = service.getApiResult();
+                } finally {
+                    reqData.clear();
+                }
+
+                if (!writeResponse(trailer, ctx)) {
+                    ctx.writeAndFlush(Unpooled.EMPTY_BUFFER)
+                            .addListener(ChannelFutureListener.CLOSE);
+                }
+                reset();
+            }
+        }
+    }
+
+    private void readPostData() {
+        try {
+            decoder = new HttpPostRequestDecoder(factory, request);
+            for (InterfaceHttpData data : decoder.getBodyHttpDatas()) {
+                if (HttpDataType.Attribute == data.getHttpDataType()) {
+                    try {
+                        Attribute attribute = (Attribute) data;
+                        reqData.put(attribute.getName(), attribute.getValue());
+                    } catch (IOException e) {
+                        logger.error("BODY Attribute: " + data.getHttpDataType().name(), e);
+                        return;
+                    }
+                }
+                else {
+                    logger.info("BODY data : " + data.getHttpDataType().name() + ": " + data);
+                }
+            }
+        } catch (ErrorDataDecoderException e) {
+            logger.error(e);
+        } finally {
+            if (decoder != null) {
+                decoder.destroy();
             }
         }
     }
