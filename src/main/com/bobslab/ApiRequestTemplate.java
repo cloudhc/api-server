@@ -1,6 +1,10 @@
 package com.bobslab;
 
-import java.util.logging.LogManager;
+import com.google.gson.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Map;
 
 /**
  * Created by bast on 2016-04-19.

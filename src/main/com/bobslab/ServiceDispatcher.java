@@ -1,11 +1,11 @@
 package com.bobslab;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Map;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
 /**
  * Created by bast on 2016-04-19.
@@ -24,6 +24,41 @@ public class ServiceDispatcher {
         String serviceUri = requestMap.get("REQUEST_URI");
         String beanName = null;
 
-        // Continue
+        if (serviceUri == null) {
+            beanName = "notFound";
+        }
+
+        if (serviceUri.startsWith("/tokens")) {
+            String httpMethod = requestMap.get("REQUEST_METHOD");
+            switch (httpMethod) {
+                case "POST":
+                    beanName = "tokenIssue";
+                    break;
+                case "DELETE":
+                    beanName = "tokenExpre";
+                    break;
+                case "GET":
+                    beanName = "tokenVerify";
+                    break;
+                default:
+                    beanName = "notFound";
+                    break;
+            }
+        } else if(serviceUri.startsWith("/users")) {
+            beanName = "users";
+        } else {
+            beanName = "notFound";
+        }
+
+        ApiRequest service = null;
+        try {
+            service = (ApiRequest) springContext.getBean(beanName, requestMap);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            service = (ApiRequest) springContext.getBean("notFound", requestMap);
+        }
+
+        return service;
     }
 }

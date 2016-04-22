@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" hash="1649587335">
+    <data-source source="LOCAL" name="dataSource" uuid="35d60d8b-6f8d-4309-af7f-def04f2589be">
+      <driver-ref>hsqldb.local</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.hsqldb.jdbc.JDBCDriver</jdbc-driver>
+      <jdbc-url>jdbc:hsqldb:file:D:/My_Databases/hsqldb-2.3.3/hsqldb/data/test</jdbc-url>
+      <driver-properties>
+        <property name="users" value="free7211" />
+      </driver-properties>
+    </data-source>
+  </component>
+</project>

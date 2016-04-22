@@ -10,7 +10,8 @@ import java.net.InetSocketAddress;
  * Created by bast on 2016-04-19.
  */
 @Configuration
-@ComponentScan("com.bobslab, com.bobslab.service")
+@ImportResource("classpath:hsqlApplicationContext.xml")
+@ComponentScan("com.boblabs.core, com.bobslab, com.bobslab.service")
 @PropertySource("classpath:api-server.properties")
 public class ApiServerConfig {
     @Value("${boss.thread.count}")

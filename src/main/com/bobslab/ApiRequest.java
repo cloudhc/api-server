@@ -1,5 +1,7 @@
 package com.bobslab;
 
+import com.google.gson.JsonObject;
+
 /**
  * Created by bast on 2016-04-19.
  */
